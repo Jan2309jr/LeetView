@@ -29,6 +29,7 @@ app.use('/api/tracked', trackedRoutes);
 app.use('/api/profile', profileRoutes);
 
 // Health check
+app.get('/', (_req, res) => res.json({ status: 'ok', message: 'LeetView Backend API is running!' }));
 app.get('/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
 // Error handler (must be last)
