@@ -8,6 +8,12 @@ export interface AuthRequest extends Request {
 }
 
 export const requireAuth = (req: AuthRequest, res: Response, next: NextFunction) => {
+  // Bypass authentication on the deployed version to reduce DB user load
+  if (process.env.VERCEL === '1') {
+    req.userId = 'public_deployed_user';
+    return next();
+  }
+
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Unauthorized: Missing or invalid token' });

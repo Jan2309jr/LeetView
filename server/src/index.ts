@@ -11,7 +11,8 @@ const app = express();
 const PORT = parseInt(process.env.PORT || '3001', 10);
 
 // Middleware
-app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:3000'] }));
+const corsOrigin = process.env.VERCEL === '1' ? '*' : ['http://localhost:5173', 'http://localhost:3000'];
+app.use(cors({ origin: corsOrigin }));
 app.use(express.json());
 
 // Rate limiting — max 60 requests per minute per IP
@@ -33,6 +34,10 @@ app.get('/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date()
 // Error handler (must be last)
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`🚀 LeetView server running on http://localhost:${PORT}`);
-});
+if (process.env.VERCEL !== '1') {
+  app.listen(PORT, () => {
+    console.log(`🚀 LeetView server running on http://localhost:${PORT}`);
+  });
+}
+
+export default app;
