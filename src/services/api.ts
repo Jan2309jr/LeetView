@@ -6,7 +6,8 @@ const BASE_URL = import.meta.env.VITE_API_URL || '';
 
 const api = axios.create({ baseURL: BASE_URL, timeout: 15000 });
 
-export async function fetchProfile(username: string): Promise<LeetCodeProfile> {
-  const { data } = await api.get<LeetCodeProfile>(`/api/profile?username=${encodeURIComponent(username)}`);
+export async function fetchProfile(username: string, force = false): Promise<LeetCodeProfile> {
+  const url = `/api/profile?username=${encodeURIComponent(username)}${force ? '&force=true' : ''}`;
+  const { data } = await api.get<LeetCodeProfile>(url);
   return data;
 }

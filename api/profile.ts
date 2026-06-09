@@ -18,10 +18,12 @@ const PROFILE_QUERY = `
         acSubmissionNum {
           difficulty
           count
+          submissions
         }
         totalSubmissionNum {
           difficulty
           count
+          submissions
         }
       }
     }
@@ -47,6 +49,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const username = (req.query.username as string) || (req.body?.username as string);
+  const forceRefresh = req.query.force === 'true';
 
   if (!username) {
     res.status(400).json({ error: 'Username is required' });
@@ -55,11 +58,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const lowerUser = username.toLowerCase();
 
-  // Check cache
-  const cached = cache.get(lowerUser);
-  if (cached && Date.now() - cached.fetchedAt < CACHE_TTL) {
-    res.status(200).json(cached.data);
-    return;
+  // Check cache (skip if forceRefresh is true)
+  if (!forceRefresh) {
+    const cached = cache.get(lowerUser);
+    if (cached && Date.now() - cached.fetchedAt < CACHE_TTL) {
+      res.status(200).json(cached.data);
+      return;
+    }
   }
 
   try {
@@ -92,23 +97,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return;
     }
 
-    const acStats: Array<{ difficulty: string; count: number }> =
+    const acStats: Array<{ difficulty: string; count: number; submissions: number }> =
       user.submitStats?.acSubmissionNum || [];
-    const totalStats: Array<{ difficulty: string; count: number }> =
+    const totalStats: Array<{ difficulty: string; count: number; submissions: number }> =
       user.submitStats?.totalSubmissionNum || [];
 
     const getCount = (arr: typeof acStats, difficulty: string) =>
       arr.find((s) => s.difficulty === difficulty)?.count ?? 0;
+      
+    const getSubmissions = (arr: typeof acStats, difficulty: string) =>
+      arr.find((s) => s.difficulty === difficulty)?.submissions ?? 0;
 
     const totalSolved = getCount(acStats, 'All');
     const easySolved = getCount(acStats, 'Easy');
     const mediumSolved = getCount(acStats, 'Medium');
     const hardSolved = getCount(acStats, 'Hard');
-    const totalSubmissions = getCount(totalStats, 'All');
+    
+    const totalAcceptedSubmissions = getSubmissions(acStats, 'All');
+    const totalSubmissionsCount = getSubmissions(totalStats, 'All');
 
     const acceptanceRate =
-      totalSubmissions > 0
-        ? parseFloat(((totalSolved / totalSubmissions) * 100).toFixed(1))
+      totalSubmissionsCount > 0
+        ? parseFloat(((totalAcceptedSubmissions / totalSubmissionsCount) * 100).toFixed(1))
         : null;
 
     const contestRating = data.data?.userContestRanking?.rating
@@ -122,7 +132,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       easySolved,
       mediumSolved,
       hardSolved,
-      totalSubmissions,
+      totalSubmissions: totalSubmissionsCount,
       acceptanceRate,
       contestRating,
       fetchedAt: new Date().toISOString(),

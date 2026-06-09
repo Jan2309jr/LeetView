@@ -63,8 +63,16 @@ export function useProfiles() {
   );
 
   const refreshUsername = useCallback(
-    (username: string) => {
-      queryClient.invalidateQueries({ queryKey: ['profile', username] });
+    async (username: string) => {
+      try {
+        await queryClient.fetchQuery({
+          queryKey: ['profile', username],
+          queryFn: () => fetchProfile(username, true),
+        });
+        toast.success(`Refreshed ${username}`);
+      } catch (err) {
+        toast.error(`Failed to refresh ${username}`);
+      }
     },
     [queryClient]
   );
