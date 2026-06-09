@@ -1,147 +1,73 @@
-# LeetCode Tracker Dashboard
+# React + TypeScript + Vite
 
-A real-time LeetCode profile tracker dashboard. Paste any LeetCode profile URL and watch live stats populate — solved counts, rankings, contest ratings, and more.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Features
+Currently, two official plugins are available:
 
-- **Real-time tracking** — auto-refreshes every 60 seconds via React Query polling
-- **Add profiles by URL** — extracts username automatically from any LeetCode URL
-- **Bulk import** — paste multiple URLs or upload a CSV
-- **Sortable table** — click any column header to sort
-- **Debounced search** — filter by username instantly
-- **Virtualized rendering** — handles 500+ profiles smoothly
-- **Dark mode** — toggle with one click, persisted to localStorage
-- **Export CSV** — download all tracked data
-- **Stats cards** — total solved, avg acceptance, top performer, contest leader
-- **Delete with confirmation** — modal guard before removal
-- **Persistent storage** — profiles survive browser refresh
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
----
+## React Compiler
 
-## Project Structure
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-```
-LeetView/
-├── client/          # React + TypeScript + Vite frontend
-└── server/          # Node.js + Express + TypeScript backend
-```
+## Expanding the ESLint configuration
 
----
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-## Setup
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
 
-### Prerequisites
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
 
-- Node.js 18+
-- npm 9+
-
----
-
-### 1. Backend
-
-```bash
-cd server
-npm install
-cp .env.example .env
-npm run dev
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
 
-Server starts at **http://localhost:3001**
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-**Environment variables** (`.env`):
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
-PORT=3001
-LEETCODE_GRAPHQL_URL=https://leetcode.com/graphql
-CACHE_TTL_SECONDS=30
-```
-
----
-
-### 2. Frontend
-
-```bash
-cd client
-npm install
-npm run dev
-```
-
-App opens at **http://localhost:5173**
-
-> The Vite dev server proxies `/api/*` requests to `http://localhost:3001` automatically.
-
----
-
-## API
-
-### `GET /api/profile/:username`
-
-Returns LeetCode stats for a user.
-
-**Example:**
-```
-GET http://localhost:3001/api/profile/neal_wu
-```
-
-**Response:**
-```json
-{
-  "username": "neal_wu",
-  "ranking": 1,
-  "totalSolved": 850,
-  "easySolved": 250,
-  "mediumSolved": 400,
-  "hardSolved": 200,
-  "totalSubmissions": 1200,
-  "acceptanceRate": 70.8,
-  "contestRating": 3800,
-  "fetchedAt": "2026-06-07T10:00:00.000Z"
-}
-```
-
-**Errors:**
-- `404` — user not found
-- `429` — rate limited
-- `503` — LeetCode API unreachable
-
----
-
-## Sample Test Profiles
-
-```
-https://leetcode.com/u/neal_wu/
-https://leetcode.com/u/tourist/
-https://leetcode.com/u/jiangly/
-```
-
----
-
-## Bulk Import CSV Format
-
-```csv
-profile_url
-https://leetcode.com/u/user1/
-https://leetcode.com/u/user2/
-https://leetcode.com/u/user3/
-```
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Frontend | React 18, TypeScript, Vite |
-| Styling | Tailwind CSS v3 |
-| UI Components | shadcn-style custom components |
-| Data Table | TanStack Table v8 |
-| Virtualization | TanStack Virtual |
-| Data Fetching | TanStack Query v5 (React Query) |
-| Icons | Lucide React |
-| Backend | Node.js, Express, TypeScript |
-| API | LeetCode public GraphQL |
-
----
-
-## License
-
-MIT
