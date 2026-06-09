@@ -1,4 +1,6 @@
 import { LineChart, Users, BarChart3, Trophy } from 'lucide-react';
+import { UrlInput } from './UrlInput';
+import { BulkImport } from './BulkImport';
 
 interface FeatureCardProps {
   icon: React.ReactNode;
@@ -20,7 +22,13 @@ function FeatureCard({ icon, title, description }: FeatureCardProps) {
   );
 }
 
-export function LandingPage() {
+interface LandingPageProps {
+  onAdd: (username: string) => Promise<boolean>;
+  existingUsernames: string[];
+  onAddMany: (usernames: string[]) => Promise<{ added: number; skipped: number }>;
+}
+
+export function LandingPage({ onAdd, existingUsernames, onAddMany }: LandingPageProps) {
   return (
     <div className="flex flex-col animate-fade-in w-full pb-8">
       {/* Hero Section */}
@@ -39,28 +47,10 @@ export function LandingPage() {
             </p>
           </div>
 
-          <div className="relative z-10 hidden lg:block">
-            {/* The decorative asterisk */}
-            <div className="absolute top-0 right-10 text-[#2a6d54] opacity-80" style={{ fontSize: '20rem', lineHeight: 1, marginTop: '-5rem' }}>
-              *
-            </div>
-            {/* Floating Card */}
-            <div className="relative card p-8 bg-white shadow-xl rotate-2 ml-auto max-w-sm mr-8">
-              <div className="inline-flex p-2 bg-emerald-50 rounded-xl mb-4">
-                <LineChart className="w-6 h-6 text-[var(--color-brand-dark)]" />
-              </div>
-              <h3 className="text-base font-bold text-[var(--color-brand-dark)] mb-2">Real-time Progress Tracking</h3>
-              <p className="text-sm text-gray-500 mb-6">
-                Get live updates on your solved problems, streaks, and contest performance.
-              </p>
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-white text-xs font-bold -mr-2 ring-2 ring-white">←</div>
-                <div className="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 text-xs font-bold -mr-2 ring-2 ring-white">U</div>
-                <div className="w-8 h-8 rounded-full bg-emerald-200 flex items-center justify-center text-emerald-700 text-xs font-bold -mr-2 ring-2 ring-white">M</div>
-                <div className="w-8 h-8 rounded-full bg-yellow-200 flex items-center justify-center text-yellow-700 text-xs font-bold -mr-2 ring-2 ring-white">S</div>
-                <div className="w-8 h-8 rounded-full bg-[var(--color-brand-dark)] flex items-center justify-center text-white text-xs font-bold ring-2 ring-white">+3</div>
-              </div>
-              <p className="text-xs text-gray-400 mt-4">7 profiles tracking live</p>
+          <div className="relative z-10 w-full max-w-lg mx-auto lg:mx-0 lg:ml-auto">
+            <div className="space-y-4">
+              <UrlInput onAdd={onAdd} existingUsernames={existingUsernames} />
+              <BulkImport onAddMany={onAddMany} />
             </div>
           </div>
         </div>
